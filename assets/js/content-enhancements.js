@@ -2635,50 +2635,6 @@
         "&eta;<sub>Na</sub> = 0.35 sets a 35% maximal channel block."),
     );
 
-
-
-    const AEDFigure = el("figure", "overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm");
-    const AEDImage = document.createElement("img");
-    AEDImage.src = "assets/images/AED.png";
-    AEDImage.alt = "Why the blocker works for Group A but not Group B: untreated and Na+ channel blocker voltage traces for Groups A and B.";
-    AEDImage.className = "w-full h-auto object-contain";
-    AEDFigure.appendChild(AEDImage);
-    AEDFigure.appendChild(
-      el("figcaption", "px-4 py-3 text-sm leading-relaxed text-gray-600",
-        "AED simulation comparing untreated and Na+ channel-blocked action-potential waveforms in Group A (channelopathy) and Group B (clearance failure)."),
-    );
-
-    const AEDTableWrap = el("div", "overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm");
-    const AEDTable = document.createElement("table");
-    AEDTable.className = "w-full min-w-[680px] text-left text-sm text-gray-800";
-    AEDTable.innerHTML = `
-      <caption class="px-4 py-3 text-left text-base font-extrabold text-gray-950">AED simulation summary</caption>
-      <thead class="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
-        <tr>
-          <th scope="col" class="px-4 py-3">Group</th>
-          <th scope="col" class="px-4 py-3">Treatment</th>
-          <th scope="col" class="px-4 py-3">Spikes</th>
-          <th scope="col" class="px-4 py-3">Rate</th>
-          <th scope="col" class="px-4 py-3">Ends at</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr><td class="px-4 py-3 font-semibold">Group A</td><td class="px-4 py-3">Untreated</td><td class="px-4 py-3">6</td><td class="px-4 py-3">76.4 Hz</td><td class="px-4 py-3">−50.1 mV</td></tr>
-        <tr><td class="px-4 py-3 font-semibold">Group A</td><td class="px-4 py-3">+ Drug</td><td class="px-4 py-3">6</td><td class="px-4 py-3">68.7 Hz</td><td class="px-4 py-3">−72.4 mV</td></tr>
-        <tr><td class="px-4 py-3 font-semibold">Group B</td><td class="px-4 py-3">Untreated</td><td class="px-4 py-3">7</td><td class="px-4 py-3">80.1 Hz</td><td class="px-4 py-3">−63.7 mV</td></tr>
-        <tr><td class="px-4 py-3 font-semibold">Group B</td><td class="px-4 py-3">+ Drug</td><td class="px-4 py-3">1</td><td class="px-4 py-3">0.0 Hz</td><td class="px-4 py-3">−56.0 mV</td></tr>
-      </tbody>
-    `;
-    AEDTableWrap.appendChild(AEDTable);
-
-    const AEDResults = el("div", "space-y-4");
-    AEDResults.append(AEDFigure, AEDTableWrap);
-
-    body.append(
-      el("h4", "mt-8 mb-2 text-lg font-extrabold text-gray-950", "AED Simulation Results"),
-      AEDResults,
-    );
-
     body.append(
       el("h4", "mt-6 mb-2 text-lg font-extrabold text-gray-950", "Why Glial Breakdown Distorts the Waveform"),
       html("p", classes.p,
@@ -2702,6 +2658,114 @@
 
     sec.appendChild(body);
     return sec;
+  }
+
+
+  function insertAEDResults() {
+    const pharmacology = document.getElementById("pharmacology");
+    if (!pharmacology || pharmacology.dataset.aedResultsAdded === "true") return;
+
+    const heading = Array.from(pharmacology.querySelectorAll("h4")).find(
+      (node) => node.textContent.trim() === "Why Glial Breakdown Distorts the Waveform"
+    );
+    if (!heading) return;
+
+    pharmacology.dataset.aedResultsAdded = "true";
+
+    const block = document.createElement("div");
+    block.id = "aed-results";
+    block.className = "mt-8 mb-2 space-y-4";
+
+    const title = document.createElement("h4");
+    title.className = "mt-0 mb-2 text-lg font-extrabold text-gray-950";
+    title.textContent = "AED Simulation Results";
+    block.appendChild(title);
+
+    const figure = document.createElement("figure");
+    figure.className = "overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm";
+
+    const image = document.createElement("img");
+    image.src = "assets/images/AED.png";
+    image.alt = "AED simulation graph comparing untreated and drug-treated voltage traces for Groups A and B.";
+    image.className = "w-full h-auto object-contain";
+    image.loading = "lazy";
+    figure.appendChild(image);
+
+    const caption = document.createElement("figcaption");
+    caption.className = "px-4 py-3 text-sm leading-relaxed text-gray-600";
+    caption.textContent = "AED simulation comparing untreated and drug-treated voltage traces for Groups A and B.";
+    figure.appendChild(caption);
+    block.appendChild(figure);
+
+    const tableWrap = document.createElement("div");
+    tableWrap.className = "overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm";
+
+    const table = document.createElement("table");
+    table.className = "w-full min-w-[680px] text-left text-sm text-gray-800";
+
+    const captionEl = document.createElement("caption");
+    captionEl.className = "px-4 py-3 text-left text-base font-extrabold text-gray-950";
+    captionEl.textContent = "AED simulation summary";
+    table.appendChild(captionEl);
+
+    const thead = document.createElement("thead");
+    thead.className = "bg-gray-50 text-xs uppercase tracking-wide text-gray-600";
+    const headRow = document.createElement("tr");
+    ["Group", "Treatment", "Spikes", "Rate", "Ends at"].forEach((label) => {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.className = "px-4 py-3";
+      th.textContent = label;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+    tbody.className = "divide-y divide-gray-200";
+    [
+      ["Group A", "Untreated", "6", "76.4 Hz", "−50.1 mV"],
+      ["Group A", "+ Drug", "6", "68.7 Hz", "−72.4 mV"],
+      ["Group B", "Untreated", "7", "80.1 Hz", "−63.7 mV"],
+      ["Group B", "+ Drug", "1", "0.0 Hz", "−56.0 mV"],
+    ].forEach((row) => {
+      const tr = document.createElement("tr");
+      row.forEach((value, index) => {
+        const td = document.createElement("td");
+        td.className = "px-4 py-3" + (index === 0 ? " font-semibold" : "");
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    block.appendChild(tableWrap);
+
+    heading.parentNode.insertBefore(block, heading);
+  }
+
+  function insertMatlabReference() {
+    const referencesHeading = Array.from(document.querySelectorAll("h3")).find(
+      (node) => node.textContent.trim() === "References"
+    );
+    if (!referencesHeading || document.getElementById("matlab-code-reference")) return;
+
+    const list = referencesHeading.parentElement && referencesHeading.parentElement.nextElementSibling;
+    if (!list || !["OL", "UL"].includes(list.tagName)) return;
+
+    const item = document.createElement("li");
+    item.id = "matlab-code-reference";
+    item.appendChild(document.createTextNode("MATLAB Code. "));
+
+    const link = document.createElement("a");
+    link.href = "https://github.com/christianabban/NeuralJacks/blob/main/matlab.zip";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "text-red-600 hover:underline";
+    link.textContent = "MATLAB source code (matlab.zip)";
+    item.appendChild(link);
+    list.appendChild(item);
   }
 
   function restructureSections() {
@@ -2859,6 +2923,8 @@
     appendMatlabStudyFigures();
     appendClosingOutlook();
     restructureSections();
+    insertAEDResults();
+    insertMatlabReference();
     updateNav();
     return true;
   }
